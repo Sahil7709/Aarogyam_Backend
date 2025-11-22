@@ -34,6 +34,10 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
+
+
+
+
 // Routes
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Aarogyam backend is running!', timestamp: new Date() });
