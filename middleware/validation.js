@@ -3,10 +3,56 @@
 const validateRegistration = (req, res, next) => {
   const { name, email, password, phone } = req.body;
   
-  // Validate required fields
-  if (!name || !email || !password) {
+  // Either email or phone is required
+  if (!email && !phone) {
     return res.status(400).json({
-      message: 'Name, email, and password are required'
+      message: 'Either email or phone number is required'
+    });
+  }
+  
+  // If email is provided, validate it
+  if (email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: 'Invalid email format'
+      });
+    }
+    
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+  }
+  
+  // If phone is provided, validate it
+  if (phone) {
+    // Simple phone validation (you might want to use a more comprehensive regex)
+    const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        message: 'Invalid phone number format'
+      });
+    }
+  }
+  
+  if (!name) {
+    return res.status(400).json({
+      message: 'Name is required'
+    });
+  }
+  
+  next();
+};
+
+const validateAppointment = (req, res, next) => {
+  const { name, phone, email, date, time } = req.body;
+  
+  // Validate required fields (matching our new structure)
+  if (!name || !phone || !email || !date || !time) {
+    return res.status(400).json({
+      message: 'Name, phone, email, date, and time are required'
     });
   }
   
@@ -18,33 +64,11 @@ const validateRegistration = (req, res, next) => {
     });
   }
   
-  // Validate password strength (at least 6 characters)
-  if (password.length < 6) {
+  // Validate phone number
+  const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+  if (!phoneRegex.test(phone)) {
     return res.status(400).json({
-      message: 'Password must be at least 6 characters long'
-    });
-  }
-  
-  // Validate phone number (if provided)
-  if (phone) {
-    const phoneRegex = /^\d{10,15}$/;
-    if (!phoneRegex.test(phone)) {
-      return res.status(400).json({
-        message: 'Invalid phone number format'
-      });
-    }
-  }
-  
-  next();
-};
-
-const validateAppointment = (req, res, next) => {
-  const { doctorId, date, time, reason } = req.body;
-  
-  // Validate required fields
-  if (!doctorId || !date || !time || !reason) {
-    return res.status(400).json({
-      message: 'Doctor, date, time, and reason are required'
+      message: 'Invalid phone number format'
     });
   }
   
