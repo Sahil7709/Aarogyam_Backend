@@ -7,7 +7,8 @@ import {
   register, 
   registerAdmin,
   login,
-  getProfile
+  getProfile,
+  updateProfile
 } from '../controllers/auth.controller.js';
 import { validateRegistration } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -29,7 +30,8 @@ router.post('/register', validateRegistration, register);
 router.post('/register-admin', validateRegistration, registerAdmin);
 router.post('/login', login);
 
-// Profile Route
+// Profile Routes
 router.get('/profile', authenticateToken, getProfile);
+router.put('/profile', authenticateToken, updateProfile);
 
 export default router;

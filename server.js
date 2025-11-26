@@ -19,10 +19,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`====================================`);
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`API Base URL: http://localhost:${PORT}/api`);
-  console.log(`====================================`);
+// Start server and bind to HOST (default to IPv4 loopback) to avoid
+// localhost IPv6/IPv4 resolution issues on Windows.
+// recommended - allow external (LAN) access by default in dev
+const HOST = process.env.HOST || '0.0.0.0';
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Server listening on ${HOST}:${PORT}`);
+});
+
+server.on('error', (err) => {
+  console.error('Server error:', err);
 });

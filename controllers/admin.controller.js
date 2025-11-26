@@ -54,6 +54,7 @@ export const updateUser = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -66,21 +67,26 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    await user.remove();
+    // Use deleteOne() instead of remove() for newer Mongoose versions
+    await User.deleteOne({ _id: req.params.id });
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
+    console.error('Error deleting user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 // Get all appointments
 export const getAllAppointments = async (req, res) => {
+  console.log('getAllAppointments called');
   try {
     const appointments = await Appointment.find()
       .populate('userId', 'name email phone')
       .sort({ createdAt: -1 });
+    console.log('Returning appointments:', appointments.length);
     res.json(appointments);
   } catch (error) {
+    console.error('Error in getAllAppointments:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -128,6 +134,7 @@ export const updateAppointment = async (req, res) => {
       appointment
     });
   } catch (error) {
+    console.error('Error updating appointment:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -140,9 +147,11 @@ export const deleteAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
     
-    await appointment.remove();
+    // Use deleteOne() instead of remove() for newer Mongoose versions
+    await Appointment.deleteOne({ _id: req.params.id });
     res.json({ message: 'Appointment deleted successfully' });
   } catch (error) {
+    console.error('Error deleting appointment:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -165,9 +174,11 @@ export const deleteContactMessage = async (req, res) => {
       return res.status(404).json({ message: 'Contact message not found' });
     }
     
-    await message.remove();
+    // Use deleteOne() instead of remove() for newer Mongoose versions
+    await ContactMessage.deleteOne({ _id: req.params.id });
     res.json({ message: 'Contact message deleted successfully' });
   } catch (error) {
+    console.error('Error deleting contact message:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
