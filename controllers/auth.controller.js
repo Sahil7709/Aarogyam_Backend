@@ -142,7 +142,14 @@ export async function sendOtp(req, res) {
     
     if (!otpResult.success) {
       console.error('Failed to send OTP via Twilio:', otpResult.error);
-      return res.status(500).json({ message: 'Failed to send OTP', error: otpResult.error });
+      // Return a more descriptive error message
+      const errorMessage = otpResult.error || 'Failed to send OTP';
+      console.error('Detailed error:', errorMessage);
+      return res.status(500).json({ 
+        message: 'Authenticate', 
+        error: 'Failed to send OTP',
+        details: errorMessage 
+      });
     }
     // If Twilio is not configured, our utility returns a devOtp which we should store
     // so that verification can work in development without Twilio.
