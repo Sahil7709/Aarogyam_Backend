@@ -35,7 +35,7 @@ export const createAppointment = async (req, res) => {
     }
     
     // Log the date and time values for debugging
-    console.log('Creating appointment with date:', date, 'time:', time);
+    // console.log('Creating appointment with date:', date, 'time:', time);
     
     // Ensure date is stored as a Date object for proper querying
     const appointmentDate = new Date(date);
@@ -56,14 +56,14 @@ export const createAppointment = async (req, res) => {
     await appointment.save();
     
     // Log the saved appointment for debugging
-    console.log('Appointment saved:', appointment);
+    // console.log('Appointment saved:', appointment);
     
     res.status(201).json({
       message: 'Appointment booked successfully',
       appointment,
     });
   } catch (error) {
-    console.error('Error creating appointment:', error);
+    // console.error('Error creating appointment:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -95,7 +95,7 @@ export const createPublicAppointment = async (req, res) => {
     }
     
     // Log the date and time values for debugging
-    console.log('Creating public appointment with date:', date, 'time:', time);
+    // console.log('Creating public appointment with date:', date, 'time:', time);
     
     // Ensure date is stored as a Date object for proper querying
     const appointmentDate = new Date(date);
@@ -117,14 +117,14 @@ export const createPublicAppointment = async (req, res) => {
     await appointment.save();
     
     // Log the saved appointment for debugging
-    console.log('Public appointment saved:', appointment);
+    // console.log('Public appointment saved:', appointment);
     
     res.status(201).json({
       message: 'Appointment request submitted successfully! Our team will contact you shortly.',
       appointment,
     });
   } catch (error) {
-    console.error('Error creating public appointment:', error);
+    // console.error('Error creating public appointment:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -137,20 +137,18 @@ export const getUserAppointments = async (req, res) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
     
-    console.log('Fetching appointments for user:', req.user.userId);
+    // console.log('Fetching appointments for user:', req.user.userId);
     
     // Get ALL appointments for this user, regardless of status
+    // Use lean() for better performance and select only needed fields
     const appointments = await Appointment.find({ userId: req.user.userId })
       .populate('doctorId', 'name email')
-      .sort({ date: -1, time: -1 }); // Sort by date and time, newest first
-    
-    // Log the appointments for debugging
-    console.log('Found appointments:', appointments.length);
-    console.log('Appointments data:', JSON.stringify(appointments, null, 2));
+      .sort({ date: -1, time: -1 }) // Sort by date and time, newest first
+      .lean();
     
     res.json(appointments);
   } catch (error) {
-    console.error('Error fetching user appointments:', error);
+    // console.error('Error fetching user appointments:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

@@ -21,4 +21,10 @@ const appointmentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Add indexes for better query performance
+appointmentSchema.index({ userId: 1 });
+appointmentSchema.index({ status: 1 });
+appointmentSchema.index({ date: -1 });
+appointmentSchema.index({ createdAt: -1 });
+
 export default mongoose.model('Appointment', appointmentSchema);

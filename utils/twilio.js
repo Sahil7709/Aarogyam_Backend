@@ -20,30 +20,30 @@ if (accountSid && authToken) {
  */
 export async function sendOTP(phone) {
   try {
-    console.log("Attempting to send OTP via Twilio to:", phone);
-    console.log("Client available:", !!client);
-    console.log("Service SID available:", !!serviceSid);
+    // console.log("Attempting to send OTP via Twilio to:", phone);
+    // console.log("Client available:", !!client);
+    // console.log("Service SID available:", !!serviceSid);
     
     if (client && serviceSid) {
-      console.log("Sending verification request to Twilio...");
+      // console.log("Sending verification request to Twilio...");
       const verification = await client.verify.v2
         .services(serviceSid)
         .verifications.create({ to: phone, channel: "sms" });
-      console.log("Twilio verification response:", verification);
+      // console.log("Twilio verification response:", verification);
       return { success: true, sid: verification.sid };
     }
 
     // DEV fallback: generate OTP and return it so caller can save & (optionally) log it
     const devOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.warn("Twilio not configured. Using DEV fallback OTP:", devOtp);
+    // console.warn("Twilio not configured. Using DEV fallback OTP:", devOtp);
     return { success: true, devOtp };
   } catch (err) {
-    console.error("sendOTP error:", err);
-    console.error("sendOTP error details - name:", err.name);
-    console.error("sendOTP error details - code:", err.code);
-    console.error("sendOTP error details - status:", err.status);
-    console.error("sendOTP error details - message:", err.message);
-    console.error("sendOTP error details - moreInfo:", err.moreInfo);
+    // console.error("sendOTP error:", err);
+    // console.error("sendOTP error details - name:", err.name);
+    // console.error("sendOTP error details - code:", err.code);
+    // console.error("sendOTP error details - status:", err.status);
+    // console.error("sendOTP error details - message:", err.message);
+    // console.error("sendOTP error details - moreInfo:", err.moreInfo);
     return { success: false, error: err.message || "sendOTP failed" };
   }
 }
@@ -57,16 +57,16 @@ export async function sendOTP(phone) {
  */
 export async function verifyOTP(phone, code) {
   try {
-    console.log("Attempting to verify OTP via Twilio for phone:", phone, "with code:", code);
-    console.log("Client available:", !!client);
-    console.log("Service SID available:", !!serviceSid);
+    // console.log("Attempting to verify OTP via Twilio for phone:", phone, "with code:", code);
+    // console.log("Client available:", !!client);
+    // console.log("Service SID available:", !!serviceSid);
     
     if (client && serviceSid) {
-      console.log("Sending verification check request to Twilio...");
+      // console.log("Sending verification check request to Twilio...");
       const verificationCheck = await client.verify.v2
         .services(serviceSid)
         .verificationChecks.create({ to: phone, code });
-      console.log("Twilio verification check response:", verificationCheck);
+      // console.log("Twilio verification check response:", verificationCheck);
       // Twilio returns status 'approved' when code correct
       if (verificationCheck.status === "approved") {
         return { success: true, status: verificationCheck.status };
@@ -78,12 +78,12 @@ export async function verifyOTP(phone, code) {
     // Return success:false but no error so caller uses local check
     return { success: false, error: "TWILIO_NOT_CONFIGURED" };
   } catch (err) {
-    console.error("verifyOTP error:", err);
-    console.error("verifyOTP error details - name:", err.name);
-    console.error("verifyOTP error details - code:", err.code);
-    console.error("verifyOTP error details - status:", err.status);
-    console.error("verifyOTP error details - message:", err.message);
-    console.error("verifyOTP error details - moreInfo:", err.moreInfo);
+    // console.error("verifyOTP error:", err);
+    // console.error("verifyOTP error details - name:", err.name);
+    // console.error("verifyOTP error details - code:", err.code);
+    // console.error("verifyOTP error details - status:", err.status);
+    // console.error("verifyOTP error details - message:", err.message);
+    // console.error("verifyOTP error details - moreInfo:", err.moreInfo);
     return { success: false, error: err.message || "verifyOTP failed" };
   }
 }

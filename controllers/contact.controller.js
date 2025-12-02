@@ -62,7 +62,7 @@ export const updateContactMessageStatus = async (req, res) => {
       contactMessage: message,
     });
   } catch (error) {
-    console.error('Error updating contact message status:', error);
+    // console.error('Error updating contact message status:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

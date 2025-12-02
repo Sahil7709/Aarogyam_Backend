@@ -2,19 +2,22 @@ import mongoose from 'mongoose';
 
 const medicalReportSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  title: { type: String, required: true },
-  reportType: { 
+  category: { 
     type: String, 
     required: true,
     enum: ['blood-test', 'urine-test', 'x-ray', 'mri', 'ct-scan', 'ecg', 'other']
   },
   date: { type: Date, required: true },
-  doctor: String,
-  hospital: String,
   results: mongoose.Schema.Types.Mixed,
   attachments: [String],
   notes: String,
   createdAt: { type: Date, default: Date.now },
 });
+
+// Add indexes for better query performance
+medicalReportSchema.index({ userId: 1 });
+medicalReportSchema.index({ category: 1 });
+medicalReportSchema.index({ date: -1 });
+medicalReportSchema.index({ createdAt: -1 });
 
 export default mongoose.model('MedicalReport', medicalReportSchema);

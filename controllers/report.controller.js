@@ -6,18 +6,15 @@ import { getReportStatistics, normalizeTestResults, getAbnormalValues } from '..
 // Create a new medical report
 export const createMedicalReport = async (req, res) => {
   try {
-    const { title, reportType, date, doctor, hospital, results, attachments, notes } = req.body;
+    const { category, date, results, attachments, notes } = req.body;
     
     // Normalize test results based on report type
-    const normalizedResults = normalizeTestResults(results, reportType);
+    const normalizedResults = normalizeTestResults(results, category);
     
     const report = new MedicalReport({
       userId: req.user.userId,
-      title,
-      reportType,
+      category,
       date,
-      doctor,
-      hospital,
       results: normalizedResults,
       attachments,
       notes,
@@ -37,8 +34,10 @@ export const createMedicalReport = async (req, res) => {
 // Get user medical reports
 export const getUserMedicalReports = async (req, res) => {
   try {
+    // Use lean() for better performance
     const reports = await MedicalReport.find({ userId: req.user.userId })
-      .sort({ date: -1 });
+      .sort({ date: -1 })
+      .lean();
     
     res.json(reports);
   } catch (error) {
@@ -49,10 +48,11 @@ export const getUserMedicalReports = async (req, res) => {
 // Get specific medical report
 export const getMedicalReportById = async (req, res) => {
   try {
+    // Use lean() for better performance
     const report = await MedicalReport.findOne({
       _id: req.params.id,
       userId: req.user.userId,
-    });
+    }).lean();
     
     if (!report) {
       return res.status(404).json({ message: 'Report not found' });
@@ -67,24 +67,22 @@ export const getMedicalReportById = async (req, res) => {
 // Update medical report
 export const updateMedicalReport = async (req, res) => {
   try {
-    const { title, reportType, date, doctor, hospital, results, attachments, notes } = req.body;
+    const { category, date, results, attachments, notes } = req.body;
     
+    // Use lean() for better performance
     const report = await MedicalReport.findOneAndUpdate(
       {
         _id: req.params.id,
         userId: req.user.userId,
       },
       {
-        title,
-        reportType,
+        category,
         date,
-        doctor,
-        hospital,
         results,
         attachments,
         notes,
       },
-      { new: true }
+      { new: true, lean: true }
     );
     
     if (!report) {
@@ -121,8 +119,10 @@ export const deleteMedicalReport = async (req, res) => {
 // Get user medical report statistics
 export const getMedicalReportStats = async (req, res) => {
   try {
+    // Use lean() for better performance
     const reports = await MedicalReport.find({ userId: req.user.userId })
-      .sort({ date: -1 });
+      .sort({ date: -1 })
+      .lean();
     
     const stats = getReportStatistics(reports);
     
@@ -144,11 +144,11 @@ export const getReportAbnormalities = async (req, res) => {
       return res.status(404).json({ message: 'Report not found' });
     }
     
-    const abnormalities = getAbnormalValues(report.results, report.reportType);
+    const abnormalities = getAbnormalValues(report.results, report.category);
     
     res.json({
       reportId: report._id,
-      reportType: report.reportType,
+      reportType: report.category,
       abnormalities
     });
   } catch (error) {

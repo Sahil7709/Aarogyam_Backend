@@ -9,4 +9,8 @@ const contactMessageSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Add indexes for better query performance
+contactMessageSchema.index({ status: 1 });
+contactMessageSchema.index({ createdAt: -1 });
+
 export default mongoose.model('ContactMessage', contactMessageSchema);

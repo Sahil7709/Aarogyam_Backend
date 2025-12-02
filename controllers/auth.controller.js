@@ -56,11 +56,6 @@ export async function checkPhoneNumber(req, res) {
   try {
     const { phoneNumber } = req.body;
     
-    console.log(`=== CHECK PHONE DEBUG ===`);
-    console.log(`Received phoneNumber: "${phoneNumber}"`);
-    console.log(`Type of phoneNumber: ${typeof phoneNumber}`);
-    console.log(`Length of phoneNumber: ${phoneNumber ? phoneNumber.length : 'null'}`);
-    
     // Ensure consistent phone number format
     let formattedPhone = phoneNumber;
     if (phoneNumber) {
@@ -75,20 +70,16 @@ export async function checkPhoneNumber(req, res) {
       }
     }
     
-    console.log(`Final formattedPhone: "${formattedPhone}"`);
+    // console.log(`Final formattedPhone: "${formattedPhone}"`);
     
     const existingUser = await User.findOne({ phone: formattedPhone });
     
-    console.log(`User lookup result:`, existingUser ? 'Found' : 'Not found');
-    
     if (existingUser) {
-      console.log(`Found user with phone: ${existingUser.phone}`);
       res.json({ 
         registered: true, 
         message: 'Phone number is registered' 
       });
     } else {
-      console.log(`No user found with phone: ${formattedPhone}`);
       res.json({ 
         registered: false, 
         message: 'Phone number is not registered' 
@@ -105,16 +96,13 @@ export async function sendOtp(req, res) {
   try {
     let { phone } = req.body;
     
-    console.log(`=== SEND OTP DEBUG ===`);
-    console.log(`Received phone: "${phone}"`);
-    console.log(`Type of phone: ${typeof phone}`);
-    console.log(`Length of phone: ${phone ? phone.length : 'null'}`);
+
     
     // Ensure consistent phone number format
     if (phone) {
       // Remove spaces and ensure it starts with +
       phone = phone.replace(/\s+/g, '').trim();
-      console.log(`After removing spaces: "${phone}"`);
+      // console.log(`After removing spaces: "${phone}"`);
       if (!phone.startsWith('+')) {
         // If no country code, assume India (+91)
         if (phone.length === 10) {
@@ -123,28 +111,21 @@ export async function sendOtp(req, res) {
       }
     }
     
-    console.log(`Final phone: "${phone}"`);
+    // console.log(`Final phone: "${phone}"`);
     
     // Find user by phone
     const user = await User.findOne({ phone });
     
-    console.log(`User lookup result:`, user ? 'Found' : 'Not found');
-    
     if (!user) {
-      console.log(`User not found with phone: ${phone}`);
       return res.status(400).json({ message: 'User not found. Please register first.' });
     }
     
     // Send OTP via Twilio
-    console.log(`Sending OTP via Twilio to: ${phone}`);
     const otpResult = await sendOTP(phone);
-    console.log(`Twilio OTP result:`, otpResult);
     
     if (!otpResult.success) {
-      console.error('Failed to send OTP via Twilio:', otpResult.error);
       // Return a more descriptive error message
       const errorMessage = otpResult.error || 'Failed to send OTP';
-      console.error('Detailed error:', errorMessage);
       return res.status(500).json({ 
         message: 'Authenticate', 
         error: 'Failed to send OTP',
@@ -159,7 +140,7 @@ export async function sendOtp(req, res) {
         user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
         await user.save();
       } catch (err) {
-        console.error('Failed to save dev OTP to user:', err);
+        // console.error('Failed to save dev OTP to user:', err);
       }
     }
 
@@ -171,7 +152,7 @@ export async function sendOtp(req, res) {
 
     res.json(responseBody);
   } catch (error) {
-    console.error('Error sending OTP:', error);
+    // console.error('Error sending OTP:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 }
@@ -181,8 +162,7 @@ export async function verifyOtp(req, res) {
   try {
     let { phone, otp } = req.body;
     
-    console.log(`=== VERIFY OTP DEBUG ===`);
-    console.log(`Received phone: "${phone}", OTP: "${otp}"`);
+
     
     // Ensure consistent phone number format
     if (phone) {
@@ -196,20 +176,16 @@ export async function verifyOtp(req, res) {
       }
     }
     
-    console.log(`Formatted phone: "${phone}"`);
-    
     // Find user by phone
     const user = await User.findOne({ phone });
     
     if (!user) {
-      console.log(`User not found with phone: ${phone}`);
+      // console.log(`User not found with phone: ${phone}`);
       return res.status(400).json({ message: 'User not found' });
     }
     
     // Use Twilio verification instead of checking stored OTP
-    console.log(`Verifying OTP via Twilio for: ${phone}`);
     const verificationResult = await verifyOTP(phone, otp);
-    console.log(`Twilio verification result:`, verificationResult);
     // Handle both Twilio-backed verification and local dev fallback
     let verified = false;
     if (verificationResult.success) {
@@ -236,7 +212,7 @@ export async function verifyOtp(req, res) {
         user.otpExpires = undefined;
         await user.save();
       } catch (err) {
-        console.error('Failed to clear user OTP after verification:', err);
+        // console.error('Failed to clear user OTP after verification:', err);
       }
     }
     
@@ -259,7 +235,7 @@ export async function verifyOtp(req, res) {
       },
     });
   } catch (error) {
-    console.error('Error verifying OTP:', error);
+    // console.error('Error verifying OTP:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 }
@@ -267,7 +243,7 @@ export async function verifyOtp(req, res) {
 // User Registration
 export async function register(req, res) {
   try {
-    let { name, email, password, phone } = req.body;
+    let { name, email, password, phone, bloodGroup, height, weight, allergies, location } = req.body;
     
     // Format phone number consistently
     if (phone) {
@@ -313,6 +289,13 @@ export async function register(req, res) {
       userData.password = await bcrypt.hash(password, salt);
     }
     
+    // Add patient profile information if provided
+    if (bloodGroup) userData.bloodGroup = bloodGroup;
+    if (height) userData.height = height;
+    if (weight) userData.weight = weight;
+    if (allergies) userData.allergies = allergies;
+    if (location) userData.location = location;
+    
     // Create new user
     const user = new User(userData);
     await user.save();
@@ -333,6 +316,11 @@ export async function register(req, res) {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        bloodGroup: user.bloodGroup,
+        height: user.height,
+        weight: user.weight,
+        allergies: user.allergies,
+        location: user.location,
       },
     });
   } catch (error) {
@@ -422,29 +410,22 @@ export async function login(req, res) {
   try {
     let { email, password, phone } = req.body;
     
-    console.log('Login attempt with:', { email, password, phone });
-    
     // Check if either email or phone is provided
     if (!email && !phone) {
-      console.log('Login failed: Email or phone number is required');
       return res.status(400).json({ message: 'Email or phone number is required' });
     }
     
     let user;
     if (email) {
       // Find user by email
-      console.log('Searching for user by email:', email);
       user = await User.findOne({ email });
       if (!user) {
-        console.log('Login failed: User not found with email');
         return res.status(400).json({ message: 'Invalid credentials' });
       }
       
       // Check password
-      console.log('Checking password for user:', user.email);
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        console.log('Login failed: Invalid password');
         return res.status(400).json({ message: 'Invalid credentials' });
       }
     } else if (phone) {
@@ -461,10 +442,8 @@ export async function login(req, res) {
       }
       
       // Find user by phone (for OTP users)
-      console.log('Searching for user by phone:', phone);
       user = await User.findOne({ phone });
       if (!user) {
-        console.log('Login failed: User not found with phone');
         return res.status(400).json({ message: 'User not found. Please register first.' });
       }
       
@@ -479,7 +458,7 @@ export async function login(req, res) {
     if (user.email) payload.email = user.email;
     if (user.phone) payload.phone = user.phone;
     
-    console.log('Generating token for user:', user.email || user.phone);
+
     const token = jwt.sign(payload, JWT_SECRET);
     
     res.json({
@@ -513,6 +492,12 @@ export async function getProfile(req, res) {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        bloodGroup: user.bloodGroup,
+        height: user.height,
+        weight: user.weight,
+        allergies: user.allergies,
+        location: user.location,
+        additionalHealthInfo: user.additionalHealthInfo,
         createdAt: user.createdAt,
       }
     });
@@ -524,7 +509,7 @@ export async function getProfile(req, res) {
 // Update User Profile
 export async function updateProfile(req, res) {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, bloodGroup, height, weight, allergies, location, additionalHealthInfo } = req.body;
     
     // Find user by ID from token
     const user = await User.findById(req.user.userId);
@@ -536,6 +521,12 @@ export async function updateProfile(req, res) {
     if (name !== undefined) user.name = name;
     if (email !== undefined) user.email = email;
     if (phone !== undefined) user.phone = phone;
+    if (bloodGroup !== undefined) user.bloodGroup = bloodGroup;
+    if (height !== undefined) user.height = height;
+    if (weight !== undefined) user.weight = weight;
+    if (allergies !== undefined) user.allergies = allergies;
+    if (location !== undefined) user.location = location;
+    if (additionalHealthInfo !== undefined) user.additionalHealthInfo = additionalHealthInfo;
     
     // Save updated user
     await user.save();
@@ -547,11 +538,17 @@ export async function updateProfile(req, res) {
         name: user.name,
         email: user.email,
         phone: user.phone,
-        role: user.role
+        role: user.role,
+        bloodGroup: user.bloodGroup,
+        height: user.height,
+        weight: user.weight,
+        allergies: user.allergies,
+        location: user.location,
+        additionalHealthInfo: user.additionalHealthInfo,
       }
     });
   } catch (error) {
-    console.error('Error updating profile:', error);
+    // console.error('Error updating profile:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 }

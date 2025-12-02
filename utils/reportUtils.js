@@ -13,10 +13,10 @@ const getReportStatistics = (reports) => {
 
   // Count reports by type
   reports.forEach(report => {
-    if (!stats.byType[report.reportType]) {
-      stats.byType[report.reportType] = 0;
+    if (!stats.byType[report.category]) {
+      stats.byType[report.category] = 0;
     }
-    stats.byType[report.reportType]++;
+    stats.byType[report.category]++;
   });
 
   // Count reports by month
@@ -43,9 +43,9 @@ const getReportStatistics = (reports) => {
 /**
  * Normalize different test result formats
  */
-const normalizeTestResults = (results, reportType) => {
+const normalizeTestResults = (results, category) => {
   // Handle different report types with specific formatting
-  switch (reportType) {
+  switch (category) {
     case 'blood-test':
       return normalizeBloodTest(results);
     case 'urine-test':
@@ -134,7 +134,7 @@ const normalizeMRIResults = (results) => {
 /**
  * Get abnormal values from test results
  */
-const getAbnormalValues = (results, reportType) => {
+const getAbnormalValues = (results, category) => {
   const abnormalities = [];
   
   // Define normal ranges for different test types
@@ -151,8 +151,8 @@ const getAbnormalValues = (results, reportType) => {
     }
   };
   
-  if (normalRanges[reportType]) {
-    const ranges = normalRanges[reportType];
+  if (normalRanges[category]) {
+    const ranges = normalRanges[category];
     
     for (const key in results) {
       if (ranges[key] && results[key] !== null && results[key] !== undefined) {
