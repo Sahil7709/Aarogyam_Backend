@@ -36,6 +36,7 @@ import {
 import User from './models/User.js';
 import authRoutes from './routes/auth.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 
 dotenv.config();
 
@@ -87,6 +88,9 @@ app.use('/api/auth', authRoutes);
 
 // Admin routes
 app.use('/api/admin', adminRoutes);
+
+// Chat routes
+app.use('/api/chat', chatRoutes);
 
 // Create Appointment
 app.post('/api/appointments', authenticateToken, validateAppointment, createAppointment);
