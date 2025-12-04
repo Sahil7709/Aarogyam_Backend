@@ -5,7 +5,7 @@ const medicalReportSchema = new mongoose.Schema({
   category: { 
     type: String, 
     required: true,
-    enum: ['blood-test', 'urine-test', 'x-ray', 'mri', 'ct-scan', 'ecg', 'other']
+    enum: ['blood-test', 'gut-test']
   },
   date: { type: Date, required: true },
   results: mongoose.Schema.Types.Mixed,

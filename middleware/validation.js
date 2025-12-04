@@ -93,12 +93,12 @@ const validateAppointment = (req, res, next) => {
 };
 
 const validateMedicalReport = (req, res, next) => {
-  const { title, reportType, date } = req.body;
+  const { category, date } = req.body;
   
   // Validate required fields
-  if (!title || !reportType || !date) {
+  if (!category || !date) {
     return res.status(400).json({
-      message: 'Title, report type, and date are required'
+      message: 'Category and date are required'
     });
   }
   
@@ -110,11 +110,11 @@ const validateMedicalReport = (req, res, next) => {
     });
   }
   
-  // Validate report type
-  const validReportTypes = ['blood-test', 'urine-test', 'x-ray', 'mri', 'ct-scan', 'ecg', 'other'];
-  if (!validReportTypes.includes(reportType)) {
+  // Validate category
+  const validCategories = ['blood-test', 'gut-test'];
+  if (!validCategories.includes(category)) {
     return res.status(400).json({
-      message: 'Invalid report type'
+      message: 'Invalid category'
     });
   }
   
