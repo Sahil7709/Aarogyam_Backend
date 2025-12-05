@@ -8,8 +8,10 @@ import { authenticateToken } from './middleware/auth.js';
 import { 
   validateAppointment, 
   validateMedicalReport,
-  validateContactMessage
-} from './middleware/validation.js';
+  validateContactMessage,
+  validate,
+  validateIdParam
+} from './middleware/validation.middleware.js';
 import { 
   createAppointment,
   createPublicAppointment,
@@ -33,10 +35,22 @@ import {
   updateContactMessageStatus,
   deleteContactMessage
 } from './controllers/contact.controller.js';
+import { 
+  checkUserExists,
+  checkPhoneNumber,
+  sendOtp,
+  verifyOtp,
+  register,
+  registerAdmin,
+  login,
+  getProfile,
+  updateProfile
+} from './controllers/auth.controller.js';
 import User from './models/User.js';
 import authRoutes from './routes/auth.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import errorHandler from './middleware/error.middleware.js';
 
 dotenv.config();
 
@@ -51,6 +65,7 @@ app.use(cors({
       "http://localhost:5173",
       "http://127.0.0.1:3000",
       "http://127.0.0.1:5173",
+      "https://aarogyam-website.vercel.app",
       // Expo development server ports
       "http://localhost:19000",
       "http://localhost:19001",
@@ -72,7 +87,6 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-
 // Middleware
 app.use(express.json());
 
@@ -80,8 +94,6 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Aarogyam backend is running!', timestamp: new Date() });
 });
-
-
 
 // Auth routes
 app.use('/api/auth', authRoutes);
@@ -93,7 +105,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 
 // Create Appointment
-app.post('/api/appointments', authenticateToken, validateAppointment, createAppointment);
+app.post('/api/appointments', authenticateToken, validateAppointment, validate, createAppointment);
 
 // Public Appointment Creation (no authentication required)
 app.post('/api/appointments/public', createPublicAppointment);
@@ -102,16 +114,16 @@ app.post('/api/appointments/public', createPublicAppointment);
 app.get('/api/appointments', authenticateToken, getUserAppointments);
 
 // Get Appointment by ID
-app.get('/api/appointments/:id', authenticateToken, getAppointmentById);
+app.get('/api/appointments/:id', authenticateToken, validateIdParam, validate, getAppointmentById);
 
 // Update Appointment Status
-app.put('/api/appointments/:id', authenticateToken, updateAppointmentStatus);
+app.put('/api/appointments/:id', authenticateToken, validateIdParam, validate, updateAppointmentStatus);
 
 // Delete Appointment
-app.delete('/api/appointments/:id', authenticateToken, cancelAppointment);
+app.delete('/api/appointments/:id', authenticateToken, validateIdParam, validate, cancelAppointment);
 
 // Create Medical Report
-app.post('/api/reports', authenticateToken, validateMedicalReport, createMedicalReport);
+app.post('/api/reports', authenticateToken, validateMedicalReport, validate, createMedicalReport);
 
 // Get User Medical Reports
 app.get('/api/reports', authenticateToken, getUserMedicalReports);
@@ -120,27 +132,30 @@ app.get('/api/reports', authenticateToken, getUserMedicalReports);
 app.get('/api/reports/stats', authenticateToken, getMedicalReportStats);
 
 // Get Abnormal Values in a Report
-app.get('/api/reports/:id/abnormalities', authenticateToken, getReportAbnormalities);
+app.get('/api/reports/:id/abnormalities', authenticateToken, validateIdParam, validate, getReportAbnormalities);
 
 // Get Specific Medical Report
-app.get('/api/reports/:id', authenticateToken, getMedicalReportById);
+app.get('/api/reports/:id', authenticateToken, validateIdParam, validate, getMedicalReportById);
 
 // Update Medical Report
-app.put('/api/reports/:id', authenticateToken, updateMedicalReport);
+app.put('/api/reports/:id', authenticateToken, validateIdParam, validate, updateMedicalReport);
 
 // Delete Medical Report
-app.delete('/api/reports/:id', authenticateToken, deleteMedicalReport);
+app.delete('/api/reports/:id', authenticateToken, validateIdParam, validate, deleteMedicalReport);
 
 // Submit Contact Message
-app.post('/api/contact', validateContactMessage, submitContactMessage);
+app.post('/api/contact', validateContactMessage, validate, submitContactMessage);
 
 // Get Contact Messages (Admin only)
 app.get('/api/contact', authenticateToken, getContactMessages);
 
 // Update Contact Message Status (Admin only)
-app.put('/api/contact/:id', authenticateToken, updateContactMessageStatus);
+app.put('/api/contact/:id', authenticateToken, validateIdParam, validate, updateContactMessageStatus);
 
 // Delete Contact Message (Admin only)
-app.delete('/api/contact/:id', authenticateToken, deleteContactMessage);
+app.delete('/api/contact/:id', authenticateToken, validateIdParam, validate, deleteContactMessage);
+
+// Error handling middleware
+app.use(errorHandler);
 
 export default app;
